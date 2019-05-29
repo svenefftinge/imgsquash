@@ -1,0 +1,27 @@
+ports:
+- port: 3000
+  onOpen: ignore
+- port: 3001
+  onOpen: open-preview
+
+tasks:
+- name: gcloud
+  init: >
+    curl -H 'Cache-Control: no-cache' https://sdk.cloud.google.com > /tmp/gcpsdk &&
+    bash /tmp/gcpsdk --disable-prompts --install-dir=/workspace &&
+    rm /tmp/gcpsdk
+- name: api
+  before: cd api
+  init: >
+    npm install &&
+    echo "API_VERSION: 1 \
+    GC_STORAGE: [your-google-cloud-bucket-name] \
+    DL_BASE_URL: [YOUR-API-URL]/1/dl" > .env &&
+    gp open .env
+  command: npm run dev
+  openMode: split-right
+- name: front
+  before: cd front
+  init: npm install
+  command: npm run dev
+  openMode: split-right
